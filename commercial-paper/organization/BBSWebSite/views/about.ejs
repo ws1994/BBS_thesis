@@ -1,0 +1,43 @@
+<% layout('layout') %>
+<section class="jumbotron text-center">
+    <div class="container py-3">
+     <h1><%= title %></h1>
+    </div>
+
+    <form action='/chainOfCustody' method="post">
+        <input type="text" id="filename" name="filename" placeholder="输入文件名..."/>
+        <input type="submit" value="构造证据链">
+    </form>
+
+</section>
+
+
+
+<div class="table-responsive col-12">
+<table class="table table-striped table-sm">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">操作</th>
+      <th scope="col">请求用户</th>
+      <th scope="col">时间戳</th>
+      <th scope="col">交易哈希</th>
+      <th scope="col">区块哈希</th>
+    </tr>
+  </thead>
+  <tbody>
+      <ul>
+      <% for(var i=0; i< txChainArr.length; i++){ %>
+          <tr>
+          <td>00<%-i+1%></td>
+          <td><%-txChainArr[i].operation %></td>
+          <td><%-txChainArr[i].user %></td>
+          <td><%-txChainArr[i].time %></td>
+          <td><%-txChainArr[i].txID %></td>
+          <td><%-txChainArr[i].blockHash %></td>
+          </tr>
+      <% } %>
+    </ul>
+  </tbody>
+</table>
+</div>

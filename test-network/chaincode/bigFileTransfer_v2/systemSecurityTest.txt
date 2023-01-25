@@ -1,0 +1,102 @@
+export PEER0_ORG1_CA=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export PEER0_ORG2_CA=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+
+1. 链码部署问题
+
+带签名的链码部署见文件  deployCC_twoHost_signature.txt
+
+
+2. 非成员背书私有交易问题（finished）
+
+./addOrg3.sh up -s couchdb
+
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+
+peer chaincode invoke -o localhost:7050 --tls true --cafile $ORDERER_CA -C mychannel -n bigFileTransfer2 --peerAddresses localhost:9051 --tlsRootCertFiles ${PEER0_ORG2_CA} --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["SetKey","keyShare_SongList.mp4User1@org1.example.comUser1@org2.example.com","collectionKey_org1","V2RWj6zqEBFiFnQycanuHs06Sc2F/ypW1GRvfc1uhIGUJOiDChEMlwies9kw+fnVG0oGJU3ijur9wig+xvM1mgYbu3nNWgifn3qODgH5wjkT5BnS0nfQR5rSJL50eeZroUJESlfsA4bi5y2MgipKIYlr+LXNmHlNIcJlSIvT4wD39CUuWD9P+omauyRgyoESBsWWT/wrwSgZS9cQ9ibdh8rnxOhj2/avQZz+/D2TafleKjsmq0J6YC+VoTpk9aRXLpg4GSu5RYPJbDA+AOLtJFtjHqtBZnW6qgHFNn0rDoWWsagHMA4k2TRAZHKcfd35+OHBOIT2sQCz3ICiFmv9+LNajJ9MLL0zAjIq9fKbLfQTLOhrzC8qzCYaDRkgXram9R18uQC6uQsIoU5sznF5Wy7tBXercycdoyFGbZuhIdyWqmn0iBcfMjHNDdcqt+pOiIRA+wAKkVr3KehEZaqkY5D48qEMe6mTl0CJAgWdjG/Uzl+IU4YRy6c/PFx1pVKC8NhPqcVugVmuhhs2A6GytRo4XvK8ixJkdszTx8Oglcqxau+NZyKGt0BzT8vs+mpKjGXNDJByHntYANh01hxDGEIsahGYnLW3en/yviAO48UspGayv4I26OhaSuc64frTPS4GXIRur8cArwAHbnnB7R1ByFS/lx+LUwEZ5jpnC9I=","","key_SongList.mp4User1@org1.example.comUser1@org2.example.com",""]}'
+
+
+peer chaincode invoke -o localhost:7050 --tls true --cafile $ORDERER_CA -C mychannel -n bigFileTransfer2 --peerAddresses localhost:9051 --tlsRootCertFiles ${PEER0_ORG2_CA} --peerAddresses localhost:11051 --tlsRootCertFiles ${PEER0_ORG3_CA} -c '{"Args":["SetPvtData","keyShare_SongList.mp4User1@org1.example.comUser1@org2.example.com","collectionKey_org1","fake_value"]}' --waitForEvent
+
+
+
+peer chaincode query -C mychannel -n bigFileTransfer2 --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["GetPvtData","keyShare_SongList.mp4User1@org1.example.comUser1@org2.example.com","collectionKey_org1"]}'
+
+
+
+3. 未上链交易泄露问题 (finished)
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org2MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp
+export CORE_PEER_ADDRESS=localhost:9051
+export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+
+peer chaincode query -C mychannel -n bigFileTransfer2 --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["RequestKey","SongList.mp4"]}'
+
+{"aeskey":"CWwX0d50snvxhFMpwcMh5LTZplKhG0LNwo9cMTAYPBWG6jGhSrJOj1a7vzt6HBqKEIr4Jt3dMPhKUAHZeRJcNMrv+rhVom6Lub1gsuT+iG4pQ2u1pDW/G9j1O8Ol/NZoioZCxdZxkQLGQpMqhhABDiB2Xm+uj3/+FFWandkY/F1gxds/sBjtY1Kl5VLIdoYpxQ4t/bzVKH7Nny+mh2Hq9Tg04TFeuvyoJMcjC3GFONTu0a2UD3zKA22hckHGRSL5sc8YYDQ5TuGmtM0siQRlFLjjfa6sdFEWzicZ6/zPkyk0iDQFEFEg8oe4DX93dgOYn02YKJSod9zi6jeBvyDSQTPRvSvvIcMr2tIXLaYB7+QLyHv8ZS+SvoINr+0hqh4XFqVnptdt7t1RauN9up1L7Za0BTLq68V7qTo10EBXvZBuI6YO72T5+FZBBh/vHbfs0LKfQFsmzFBvZ0fILi6CQb2/qr5lQRywDmpVVotiQDvdxKolT+1BAB98tZc8OOOrYMwQtaVcFhH/T9aKDT2+S1n2ofxkFEJJ7ukCpawREC2F90z6Hzi0U9TLEmgs7oXcMWyCmGm13d+fojYYRJskjwWzpHLqd/O1I8uVOQwFsXWZgPj3RfnMrN+a44ABfi5+wxDhNK74gdswuXAIrsbLPob/Lwxy0vEXQdVQionXxOQ=","encryptedfilehash":"","keyid":"key_SongList.mp4User1@org1.example.comUser1@org2.example.com","raspublickey":"","signature":null}
+
+
+docker exec -it -u root fde7215abb74 /bin/sh
+
+docker cp fde7215abb74:/var/hyperledger/production/transientstore/000001.log /home/cgao/fabric-sample-v23-Test/fabric-samples/test-network/
+
+
+参考cores实现
+
+peer chaincode query -C mychannel -n private --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["TransferAssetWS","GNsIcZkIvPGjpWplnJqcSkpVrLtZyRuolwPDvuyIBdSqoHnSpfGkDtGmMuKtPVsNDGlBhGIYkWidCggndcKuGdMjeXdCwNDJuvnUpBEFpJDcKKxLFRJQSaEPhZXzHkLs","V2RWj6zqEBFiFnQycanuHs06Sc2F/ypW1GRvfc1uhIGUJOiDChEMlwies9kw+fnVG0oGJU3ijur9wig+xvM1mgYbu3nNWgifn3qODgH5wjkT5BnS0nfQR5rSJL50eeZroUJESlfsA4bi5y2MgipKIYlr+LXNmHlNIcJlSIvT4wD39CUuWD9P+omauyRgyoESBsWWT/wrwSgZS9cQ9ibdh8rnxOhj2/avQZz+/D2TafleKjsmq0J6YC+VoTpk9aRXLpg4GSu5RYPJbDA+AOLtJFtjHqtBZnW6qgHFNn0rDoWWsagHMA4k2TRAZHKcfd35+OHBOIT2sQCz3ICiFmv9+LNajJ9MLL0zAjIq9fKbLfQTLOhrzC8qzCYaDRkgXram9R18uQC6uQsIoU5sznF5Wy7tBXercycdoyFGbZuhIdyWqmn0iBcfMjHNDdcqt+pOiIRA+wAKkVr3KehEZaqkY5D48qEMe6mTl0CJAgWdjG/Uzl+IU4YRy6c/PFx1pVKC8NhPqcVugVmuhhs2A6GytRo4XvK8ixJkdszTx8Oglcqxau+NZyKGt0BzT8vs+mpKjGXNDJByHntYANh01hxDGEIsahGYnLW3en/yviAO48UspGayv4I26OhaSuc64frTPS4GXIRur8cArwAHbnnB7R1ByFS/lx+LUwEZ5jpnC9I=","rg"]}'
+
+
+docker cp a31c314e10f4:/var/hyperledger/production/transientstore/000001.log /home/cgao/fabric-sample-v23/fabric-samples/test-network/
+
+
+
+4. payload安全问题验证 (finished)
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+peer chaincode invoke -o localhost:7050 --tls true --cafile $ORDERER_CA -C mychannel -n bigFileTransfer2 --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["GetPvtData","key_SongList.mp4User1@org1.example.comUser1@org2.example.com","_implicit_org_Org1MSP"]}' --waitForEvent
+
+
+peer channel fetch 44 block_44.pb -o orderer.example.com:7050 -c mychannel --tls --cafile $ORDERER_CA
+
+configtxlator proto_decode --input block_44.pb --type common.Block --output block_44.json
+
+chmod 777 block_44.json
+
+
+{"aeskey":"V2RWj6zqEBFiFnQycanuHs06Sc2F/ypW1GRvfc1uhIGUJOiDChEMlwies9kw+fnVG0oGJU3ijur9wig+xvM1mgYbu3nNWgifn3qODgH5wjkT5BnS0nfQR5rSJL50eeZroUJESlfsA4bi5y2MgipKIYlr+LXNmHlNIcJlSIvT4wD39CUuWD9P+omauyRgyoESBsWWT/wrwSgZS9cQ9ibdh8rnxOhj2/avQZz+/D2TafleKjsmq0J6YC+VoTpk9aRXLpg4GSu5RYPJbDA+AOLtJFtjHqtBZnW6qgHFNn0rDoWWsagHMA4k2TRAZHKcfd35+OHBOIT2sQCz3ICiFmv9+LNajJ9MLL0zAjIq9fKbLfQTLOhrzC8qzCYaDRkgXram9R18uQC6uQsIoU5sznF5Wy7tBXercycdoyFGbZuhIdyWqmn0iBcfMjHNDdcqt+pOiIRA+wAKkVr3KehEZaqkY5D48qEMe6mTl0CJAgWdjG/Uzl+IU4YRy6c/PFx1pVKC8NhPqcVugVmuhhs2A6GytRo4XvK8ixJkdszTx8Oglcqxau+NZyKGt0BzT8vs+mpKjGXNDJByHntYANh01hxDGEIsahGYnLW3en/yviAO48UspGayv4I26OhaSuc64frTPS4GXIRur8cArwAHbnnB7R1ByFS/lx+LUwEZ5jpnC9I=","encryptedfilehash":"","keyid":"key_SongList.mp4User1@org1.example.comUser1@org2.example.com","raspublickey":"","signature":null}
+
+
+
+peer chaincode invoke -o localhost:7050 --tls true --cafile $ORDERER_CA -C mychannel -n bigFileTransfer2 --peerAddresses localhost:9051 --tlsRootCertFiles ${PEER0_ORG2_CA} --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["SetKey","keyShare_SongList.mp4User1@org1.example.comUser1@org2.example.com","collectionKey_org1","V2RWj6zqEBFiFnQycanuHs06Sc2F/ypW1GRvfc1uhIGUJOiDChEMlwies9kw+fnVG0oGJU3ijur9wig+xvM1mgYbu3nNWgifn3qODgH5wjkT5BnS0nfQR5rSJL50eeZroUJESlfsA4bi5y2MgipKIYlr+LXNmHlNIcJlSIvT4wD39CUuWD9P+omauyRgyoESBsWWT/wrwSgZS9cQ9ibdh8rnxOhj2/avQZz+/D2TafleKjsmq0J6YC+VoTpk9aRXLpg4GSu5RYPJbDA+AOLtJFtjHqtBZnW6qgHFNn0rDoWWsagHMA4k2TRAZHKcfd35+OHBOIT2sQCz3ICiFmv9+LNajJ9MLL0zAjIq9fKbLfQTLOhrzC8qzCYaDRkgXram9R18uQC6uQsIoU5sznF5Wy7tBXercycdoyFGbZuhIdyWqmn0iBcfMjHNDdcqt+pOiIRA+wAKkVr3KehEZaqkY5D48qEMe6mTl0CJAgWdjG/Uzl+IU4YRy6c/PFx1pVKC8NhPqcVugVmuhhs2A6GytRo4XvK8ixJkdszTx8Oglcqxau+NZyKGt0BzT8vs+mpKjGXNDJByHntYANh01hxDGEIsahGYnLW3en/yviAO48UspGayv4I26OhaSuc64frTPS4GXIRur8cArwAHbnnB7R1ByFS/lx+LUwEZ5jpnC9I=","","key_SongList.mp4User1@org1.example.comUser1@org2.example.com",""]}'
+
+
+peer chaincode invoke -o localhost:7050 --tls true --cafile $ORDERER_CA -C mychannel -n bigFileTransfer2 --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["GetPvtData","key_SongList.mp4User1@org1.example.comUser1@org2.example.com","collectionKey_org1"]}' --waitForEvent
+
+
+peer channel fetch 17 block_17.pb -o orderer.example.com:7050 -c mychannel --tls --cafile $ORDERER_CA
+
+configtxlator proto_decode --input block_17.pb --type common.Block --output block_17.json
+
+chmod 777 block_17.json
+
+
+
+
+
+
+peer chaincode invoke -o localhost:7050 --tls true --cafile $ORDERER_CA -C mychannel -n bigFileTransfer2 --peerAddresses localhost:9051 --tlsRootCertFiles ${PEER0_ORG2_CA} --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["GetPvtData","keyShare_SongList.mp4User1@org1.example.comUser1@org2.example.com","collectionKey_org1"]}' --waitForEvent

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="/stylesheets/activity.css" rel="stylesheet" type="text/css">
+</head>
+<header>
+
+</header>
+<body>
+  <div id="page-container">
+    <div id="content-wrap">
+      <%- include partial/header.ejs %>
+
+      <div class="card card-4">
+        <div class="card-body">
+          <h2 class="title font-poppins">Activity</h2>
+
+          <div class="center-card-outer top-spacing-3">
+
+            <div class="tabs" id="query-results" hidden=true>
+              <input name="tabs" type="radio" id="tab-1" checked="checked" class="tab-input"/>
+              <label for="tab-1" class="tab-label">Transfers</label>
+              <div class="tab-panel" id="endpoints-panel">
+
+                <div class="container">
+
+                  <div class="row">
+                    <div class="custom-select-wrapper" id="SortContainer">
+                      <div class="custom-select">
+                        <div class="custom-select__trigger"><span>Select Filter</span>
+                          <div class="arrow"></div>
+                        </div>
+                        <div class="custom-options">
+                          <span class="custom-option selected" sort-option="label">Select Filter</span>
+                          <span class="custom-option" sort-option="project">Project</span>
+                          <span class="custom-option" sort-option="user">User</span>
+                          <span class="custom-option" sort-option="hash">File Hash</span>
+                          <span class="custom-option" sort-option="label">Label</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-1">
+                      <div class="input-group">
+                        <input class="input--style-4 font-poppins" type="text" id="TransferSortOption" placeholder="Enter Keywords">
+                      </div>
+                    </div>
+                    <div class="col-1">
+                      <button class="btn btn--radius-2 btn--gray" id="QuerySearch"><i class="fa fa-search"></i></button>
+                    </div>
+                  </div>
+
+                  <div class="table-row">
+                    <div class="col-md-12">
+                        <table class="table table-striped">
+                          <thead>
+                            <tr>
+                              <th>Label</th>
+                              <th>Type</th>
+                              <th>Projects</th>
+                              <th>Completed By</th>
+                              <th>Completion Time</th>
+                              <th>Status</th>
+                              <th>View</th>
+                            </tr>
+                          </thead>
+                          <tbody id="tx-list">
+
+                          </tr>
+                        </tbody>
+                      </table>
+                  </div>
+                </div>
+                </div>
+              </div>
+
+              <input name="tabs" type="radio" id="tab-2" class="tab-input"/>
+              <label for="tab-2" class="tab-label">Query File</label>
+              <div class="tab-panel" id="projects-panel">
+
+                <div class="container" id="endpoint-table-container">
+
+                  <div class="row">
+                    <div class="custom-select-wrapper" id="SortContainer">
+                      <div class="custom-select">
+                        <div class="custom-select__trigger"><span>File Hash</span>
+                          <div class="arrow"></div>
+                        </div>
+                        <div class="custom-options">
+                          <span class="custom-option" sort-option="hash">Select Filter</span>
+                          <span class="custom-option" sort-option="project">Project</span>
+                          <span class="custom-option" sort-option="user">User</span>
+                          <span class="custom-option selected" sort-option="hash">File Hash</span>
+                          <span class="custom-option" sort-option="type">Type</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-1">
+                      <div class="input-group">
+                        <input class="input--style-4 font-poppins" type="text" id="FileSortOption" placeholder="Enter Keywords">
+                      </div>
+                    </div>
+                    <div class="col-1">
+                      <button class="btn btn--radius-2 btn--gray" id="QueryFileSearch"><i class="fa fa-search"></i></button>
+                    </div>
+                  </div>
+
+                  <div class="table-row">
+                    <div class="col-md-12">
+                        <table class="table table-striped">
+                          <thead>
+                            <tr>
+                              <th>TYPE</th>
+                              <th>USER</th>
+                              <th>PROJECTS</th>
+                              <th>ENDPOINTS</th>
+                              <th>ROLE</th>
+                              <th>Completion Time</th>
+                            </tr>
+                          </thead>
+                          <tbody id="file-tx-list">
+
+                          </tbody>
+                        </table>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div id="loading-phase" hidden=true>
+              <div class="horiz-center font-poppins top-spacing-2" >Loading Records For File...</br>
+                <!--<div id="loading-counter">10 seconds</div>-->
+                <img src="/images/Loading-Spinner.gif" width=50/>
+              </div>
+
+            </div>
+
+            <div class="sub-title font-poppins top-spacing-3" id="no-results" hidden=true>
+              No Results Found. Please Try Again.
+            </div>
+
+            <div id="loaded-data" class="container" hidden=true>
+
+              <div class="row row-space top-spacing-1">
+                <button class="btn btn--radius-2 btn--gray" id="back-btn"><i class="fa fa-arrow-left"></i> Back</button>
+              </div>
+
+              <div class="font-poppins subtitle top-spacing-1" id="task-subtitle">File Transfer Status</div>
+
+              <ul class="steps top-spacing-3">
+                <li id="source-ep-step" class="step step--complete step--inactive">
+                  <span class="step__icon"></span>
+                  <span class="step__label"><b>Source Endpoint</b>
+                    <br><hr>
+                    <div id="start-ep-name"></div>
+                    <div id="start-ep-time" class="step__sublabel"><div>
+                  </span>
+                </li>
+                <li id="upload-ep-step" class="step step--complete step--inactive">
+                  <span class="step__icon"></span>
+                  <span class="step__label"><b>Upload Endpoint</b>
+                    <br><hr>
+                    <div id="upload-ep-name"></div>
+                    <div id="upload-ep-time" class="step__sublabel"><div>
+                  </span>
+                </li>
+                <li id="dest-ep-step" class="step step--incomplete step--active">
+                  <span class="step__icon"></span>
+                  <span class="step__label"><b>Destination Endpoint</b>
+                    <br><hr>
+                    <div id="dest-ep-name"></div>
+                    <div id="dest-ep-time" class="step__sublabel"><div>
+                  </span>
+                </li>
+              </ul>
+
+              <div class="font-poppins subtitle top-spacing-10" id="task-subtitle">File Details</div>
+
+              <div class="row row-space top-spacing-1">
+                <div class="col-2">
+                  <div class="input-group">
+                    <label class="label font-poppins">User</label>
+                    <input class="input--style-4 font-poppins" type="text" id="task-user" value="matthew_grohotolski@uml.edu" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row row-space top-spacing-1">
+                <div class="col-2">
+                  <div class="input-group">
+                    <label class="label font-poppins">Project</label>
+                    <input class="input--style-4 font-poppins" type="text" id="task-project" value="" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row row-space top-spacing-3">
+                <div class="col-2">
+                  <div class="input-group">
+                    <label class="label font-poppins">Type</label>
+                    <input class="input--style-4 font-poppins" type="text" id="task-type" value="File Transfer" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row row-space top-spacing-1">
+                <div class="col-2">
+                  <div class="input-group">
+                    <label class="label font-poppins">Content Changed</label>
+                    <input class="input--style-4 font-poppins" type="text" id="task-content-changed" value="1 File" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row row-space top-spacing-1">
+                <div class="col-2">
+                  <div class="input-group">
+                    <label class="label font-poppins">File Hashes</label>
+                    <input class="input--style-4 font-poppins" type="text" id="task-file-names" value="testing.txt" readonly>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row row-space top-spacing-1">
+                <div class="col-2">
+                  <div class="input-group">
+                    <label class="label font-poppins">Total File Size</label>
+                    <input class="input--style-4 font-poppins" type="text" id="task-file-size" value="12 Bytes" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+      <script src="/javascripts/activity.js"></script>
+      <%- include partial/footer.ejs %>
+    </div>
+  </body>
+  </html>

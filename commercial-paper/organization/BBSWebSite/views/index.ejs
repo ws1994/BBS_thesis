@@ -1,0 +1,45 @@
+<% layout('layout') %>
+<body>
+<!-- header -->
+<!-- // header -->
+<!-- main content -->
+<main role="main">
+<section class="jumbotron text-center">
+    <div class="container py-3">
+    <h1><%= title %></h1>
+    <p class="lead text-muted"></p>
+    </div>
+
+    <form action='/requestFile' method="post">
+        <input type="text" id="filename" name="filename" placeholder="输入文件名..."/>
+        <input type="submit" value="请求数据">
+    </form>
+</section>
+
+
+<ul>
+<div class="container px-4 py-3" id="featured-3">
+<div class="row g-4 py-3 row-cols-1 row-cols-lg-3">
+
+<% for(var i=0; i< fileRes.length; i++){ %>
+    <div class="col-md-4">
+    <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <h3 class="fs-2"><%= fileRes[i].name %></h3>
+        文件所有者：<p class="card-text"> <%= fileRes[i].owner %></p>
+        访问规则：<p class="card-text"><%= fileRes[i].description %></p>
+        文件描述：<p class="card-text"><%= fileRes[i].rule %></p>
+        文件哈希：<p class="card-text"><%= fileRes[i].filehash  %></p>
+    </div>
+    </div>
+    </div>
+<% } %>
+
+</div>
+</div>
+</ul>
+
+</main>
+<!-- // main content -->
+</body>
+
