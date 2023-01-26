@@ -1,104 +1,129 @@
-cd chaincode/bigFileTransfer/go
+./network.sh down
+
+./network.sh up createChannel -s couchdb -i 2.3.3
+
+./addOrg3.sh up -s couchdb
+
+
+cd chaincode/bigFileTransfer_v2/go
 
 GO111MODULE=on go mod vendor
 
-docker exec cli peer lifecycle chaincode package fileTransfer.tar.gz --path github.com/hyperledger/fabric/peer/chaincode/bigFileTransfer/go/ --label fileTransfer_1
-
-docker exec cli peer lifecycle chaincode install fileTransfer.tar.gz
-
-docker exec -e CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp -e CORE_PEER_ADDRESS=peer0.org2.example.com:9051 -e CORE_PEER_LOCALMSPID="Org2MSP" -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt cli peer lifecycle chaincode install fileTransfer.tar.gz
-
-docker exec -e CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp -e CORE_PEER_ADDRESS=peer0.org3.example.com:11051 -e CORE_PEER_LOCALMSPID="Org3MSP" -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt cli peer lifecycle chaincode install fileTransfer.tar.gz
-
-docker exec cli peer lifecycle chaincode approveformyorg --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --channelID mychannel --name fileTransfer --version 1 --sequence 1 --waitForEvent --package-id fileTransfer_1:515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4
-
-docker exec -e CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp -e CORE_PEER_ADDRESS=peer0.org2.example.com:9051 -e CORE_PEER_LOCALMSPID="Org2MSP" -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt cli peer lifecycle chaincode approveformyorg --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --channelID mychannel --name fileTransfer --version 1 --sequence 1 --waitForEvent --package-id fileTransfer_1:515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4
-
-docker exec -e CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp -e CORE_PEER_ADDRESS=peer0.org3.example.com:11051 -e CORE_PEER_LOCALMSPID="Org3MSP" -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt cli peer lifecycle chaincode approveformyorg --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --channelID mychannel --name fileTransfer --version 1 --sequence 1 --waitForEvent --package-id fileTransfer_1:515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4
-
-docker exec cli peer lifecycle chaincode commit -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt --peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt --peerAddresses peer0.org3.example.com:11051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt --channelID mychannel --name fileTransfer --version 1 --sequence 1 --waitForEvent
+cd ../../..
 
 
+export PATH=${PWD}/../bin:${PWD}:$PATH
+export FABRIC_CFG_PATH=$PWD/../config/
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 
 
-%********************
-% update
-%********************
+peer lifecycle chaincode package bigFileTransfer.tar.gz --lang golang --path ./chaincode/bigFileTransfer_v2/go --label bigFileTransfer_0
 
-docker exec cli peer lifecycle chaincode package fileTransfer.tar.gz --path github.com/hyperledger/fabric/peer/chaincode/bigFileTransfer/go/ --label fileTransfer_1
-
-docker exec cli peer lifecycle chaincode install fileTransfer.tar.gz
-
-docker exec -e CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp -e CORE_PEER_ADDRESS=peer0.org2.example.com:9051 -e CORE_PEER_LOCALMSPID="Org2MSP" -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt cli peer lifecycle chaincode install fileTransfer.tar.gz
-
-docker exec -e CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp -e CORE_PEER_ADDRESS=peer0.org3.example.com:11051 -e CORE_PEER_LOCALMSPID="Org3MSP" -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt cli peer lifecycle chaincode install fileTransfer.tar.gz
-
-docker exec cli peer lifecycle chaincode approveformyorg --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --channelID mychannel --name fileTransfer --version 2 --sequence 2 --waitForEvent --package-id fileTransfer_1:515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4
-
-docker exec -e CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp -e CORE_PEER_ADDRESS=peer0.org2.example.com:9051 -e CORE_PEER_LOCALMSPID="Org2MSP" -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt cli peer lifecycle chaincode approveformyorg --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --channelID mychannel --name fileTransfer --version 2 --sequence 2 --waitForEvent --package-id fileTransfer_1:515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4
-
-docker exec -e CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp -e CORE_PEER_ADDRESS=peer0.org3.example.com:11051 -e CORE_PEER_LOCALMSPID="Org3MSP" -e CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt cli peer lifecycle chaincode approveformyorg --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --channelID mychannel --name fileTransfer --version 2 --sequence 2 --waitForEvent --package-id fileTransfer_1:515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4
-
-docker exec cli peer lifecycle chaincode commit -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt --peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt --peerAddresses peer0.org3.example.com:11051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt --channelID mychannel --name fileTransfer --version 2 --sequence 2 --waitForEvent
+peer lifecycle chaincode install bigFileTransfer.tar.gz
 
 
+export version=1
+export packageID=bigFileTransfer_0:653f267467af86b9f4107a79c945640dd06e0c66ad59b015cd7046b084174252
 
 
-%********************
-% test 
-%********************
-
-docker exec cli peer chaincode invoke -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n fileTransfer --peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt --peerAddresses peer0.org2.example.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt -c '{"Args":["callScp"]}'
-
-docker exec cli peer chaincode query -C mychannel -n fileTransfer -c '{"Args":["callScp"]}'
+peer lifecycle chaincode approveformyorg --orderer localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name bigFileTransfer2 -v $version --collections-config ./chaincode/bigFileTransfer_v2/collections_config.json --package-id $packageID --sequence $version --tls --cafile $ORDERER_CA
 
 
-docker exec cli peer chaincode query -C mychannel -n fileTransfer -c '{"Args":["Init"]}'
+peer lifecycle chaincode approveformyorg --orderer localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name bigFileTransfer2 -v $version --package-id $packageID --sequence $version --tls --cafile $ORDERER_CA --init-required
 
-docker exec cli peer chaincode query -C mychannel -n fileTransfer -c '{"Args":["QueryFileInfo","filehash"]}'
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org2MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+export CORE_PEER_ADDRESS=localhost:9051
+export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+peer lifecycle chaincode install bigFileTransfer.tar.gz
+
+
+peer lifecycle chaincode approveformyorg --orderer localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name bigFileTransfer2 -v $version --collections-config ./chaincode/bigFileTransfer_v2/collections_config.json --package-id $packageID --sequence $version --tls --cafile $ORDERER_CA
+
+peer lifecycle chaincode approveformyorg --orderer localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name bigFileTransfer2 -v $version --package-id $packageID --sequence $version --tls --cafile $ORDERER_CA --init-required
 
 
 
 
-docker exec -it peer0.org1.example.com /bin/ls /
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org3MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+export CORE_PEER_ADDRESS=localhost:11051
+export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 
-docker exec -it peer0.org1.example.com /bin/sh
+peer lifecycle chaincode install bigFileTransfer.tar.gz
 
 
-docker cp /home/cgao/Hyperledger/fabric-samples/3org-privatedata-200/blocks/block_6.json dev-peer0.org1.example.com-fileTransfer_1-515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4:/opt/blocks/ 
-
-
-docker exec -it dev-peer0.org1.example.com-fileTransfer_1-515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4 /bin/sh
-
-docker exec -it -u root dev-peer0.org1.example.com-fileTransfer_1-515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4 /bin/sh
-
-docker exec -it -u root dev-peer0.org2.example.com-fileTransfer_1-515c2b6a08725fe1cc6b1bf91e5412115001920c7f30421a6e60f71dbffe1ae4 /bin/sh
+peer lifecycle chaincode approveformyorg --orderer localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID mychannel --name bigFileTransfer2 -v $version --collections-config ./chaincode/bigFileTransfer_v2/collections_config.json --package-id $packageID --sequence $version --tls --cafile $ORDERER_CA
 
 
 
-
-
-apk add openssh
-
-apk del ***
-
-
-sed -i "s/#PermitRootLogin.*/PermitRootLogin yes/g" /etc/ssh/sshd_config && \
-ssh-keygen -t dsa -P "" -f /etc/ssh/ssh_host_dsa_key && \
-ssh-keygen -t rsa -P "" -f /etc/ssh/ssh_host_rsa_key && \
-ssh-keygen -t ecdsa -P "" -f /etc/ssh/ssh_host_ecdsa_key && \
-ssh-keygen -t ed25519 -P "" -f /etc/ssh/ssh_host_ed25519_key && \
-echo "root:admin" | chpasswd
-
-
-/usr/sbin/sshd -D &
+export PEER0_ORG1_CA=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export PEER0_ORG2_CA=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export PEER0_ORG3_CA=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
 
 
 
+peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} --peerAddresses localhost:9051 --tlsRootCertFiles ${PEER0_ORG2_CA} --channelID mychannel --name bigFileTransfer2 -v $version --collections-config ./chaincode/bigFileTransfer_v2/collections_config.json --sequence $version --tls --cafile $ORDERER_CA --waitForEvent
 
 
-ssh-keygen -t dsa -P "" -f /etc/ssh/ssh_host_dsa_key && \
-ssh-keygen -t rsa -P "" -f /etc/ssh/ssh_host_rsa_key && \
-ssh-keygen -t ecdsa -P "" -f /etc/ssh/ssh_host_ecdsa_key && \
-ssh-keygen -t ed25519 -P "" -f /etc/ssh/ssh_host_ed25519_key && \
-echo "root:shan" | chpasswd
+peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} --peerAddresses localhost:9051 --tlsRootCertFiles ${PEER0_ORG2_CA} --peerAddresses localhost:11051 --tlsRootCertFiles ${PEER0_ORG3_CA} --channelID mychannel --name bigFileTransfer2 -v $version --collections-config ./chaincode/bigFileTransfer_v2/collections_config.json --sequence $version --tls --cafile $ORDERER_CA --waitForEvent
+
+*******************************
+
+
+peer chaincode invoke -o localhost:7050 --tls true --cafile $ORDERER_CA -C mychannel -n bigFileTransfer2 --peerAddresses localhost:9051 --tlsRootCertFiles ${PEER0_ORG2_CA} -c '{"Args":["AddIPInfo","{\"name\":\"ip.Org1MSP\",\"IpAdr\":\"172.27.0.11\",\"IpPort\":22}"]}' --waitForEvent
+
+peer chaincode query -C mychannel -n bigFileTransfer2 -c '{"Args":["GetIpInfo","ip.Org1MSP"]}'
+
+
+
+peer chaincode invoke -o localhost:7050 --tls true --cafile $ORDERER_CA -C mychannel -n bigFileTransfer2 --peerAddresses localhost:7051 --tlsRootCertFiles ${PEER0_ORG1_CA} -c '{"Args":["AddIPInfo","{\"name\":\"ip.Org2MSP\",\"IpAdr\":\"172.27.0.10\",\"IpPort\":22}"]}' --waitForEvent
+
+peer chaincode query -C mychannel -n bigFileTransfer2 -c '{"Args":["GetIpInfo","ip.Org2MSP"]}'
+
+
+
+peer chaincode query -C mychannel -n bigFileTransfer2 -c '{"Args":["GetIpInfo","User1@org1.example.comPublicKey"]}'
+
+
+
+peer chaincode query -C mychannel -n bigFileTransfer2 -c '{"Args":["QueryTxHistoryForFile","ip.Org1MSP"]}'
+
+peer chaincode query -C mychannel -n qscc -c '{"Args":["GetTransactionByID","mychannel","09614baa4e2724767bc6d3a2940c44d791447a40d74b22ef46bf49e502e30a1d"]}'
+
+
+
+
+
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+peer chaincode query -C mychannel -n bigFileTransfer2 -c '{"Args":["ListOffStateData"]}'
+
+
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org2MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/User1@org2.example.com/msp
+export CORE_PEER_ADDRESS=localhost:9051
+export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+peer chaincode query -C mychannel -n bigFileTransfer2 -c '{"Args":["ListOffStateData"]}'
