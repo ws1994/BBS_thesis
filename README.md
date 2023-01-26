@@ -2,15 +2,15 @@
 
 ## Blockchain System
 
-Please find the code to bring up the underlying Fabric system with the path as follows:
+Please find the code and configuration files to bring up the underlying Fabric system with the path as follows:
 
 ```
-BBS_thesis/test-network/network.sh
+BBS_thesis/test-network/
 ```
 
 or with the link as follows:
 
-https://github.com/ws1994/BBS_thesis/blob/master/test-network/network.sh
+https://github.com/ws1994/BBS_thesis/tree/master/test-network
 
 (The Fabric system is brought up from some docker images. The modification on the Fabric source code (the docker images source code) is a seperate project from this one. Please find the Fabric source code project here https://github.com/ws1994/BBS_thesis/tree/fabric)
 
