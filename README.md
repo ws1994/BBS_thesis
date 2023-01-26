@@ -2,7 +2,7 @@
 
 ## Blockchain System
 
-Please find the code to bring up a Fabric system with the path as follows:
+Please find the code to bring up the underlying Fabric system with the path as follows:
 
 ```
 BBS_thesis/test-network/network.sh
