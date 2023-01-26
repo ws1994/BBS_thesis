@@ -1,6 +1,6 @@
 # Hyperledger Fabric Source Code 
 
-Modify the source code and re-compile this project will generate modified docker images, which can be used to bring up a Fabric system.
+Modify the source code and re-compile this project will generate modified docker images, which can be used to bring up a Fabric system and further develop the big-data sharing application as shown in this link https://github.com/ws1994/BBS_thesis .
 
 ## Integrate the CORE Scheme
 
