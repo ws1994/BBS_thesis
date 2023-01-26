@@ -34,15 +34,14 @@ Please find the two Fabirc clients/users (one is for Sender, and another is for 
 BBS_thesis/commercial-paper/organization/digibank/application/
 ```
 ```
-BBS_thesis/commercial-paper/organization/magnetocorp/
+BBS_thesis/commercial-paper/organization/magnetocorp/application/
 ```
 
 or with the link as follows:
 
-https://github.com/ws1994/BBS_thesis/tree/master/commercial-paper/organization/digibank
+https://github.com/ws1994/BBS_thesis/tree/master/commercial-paper/organization/digibank/application
 
-https://github.com/ws1994/BBS_thesis/tree/master/commercial-paper/organization/magnetocorp
-
+https://github.com/ws1994/BBS_thesis/tree/master/commercial-paper/organization/magnetocorp/application
 ## Website
 
 Please find the Website code with the path as follows:
