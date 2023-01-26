@@ -6,7 +6,7 @@ Modify the source code and re-compile this project will generate modified docker
 
 This project only shows the code example to integrate CORE encryption scheme to the private data collection mechanism in Fabric. There is no code example for other modifications.
 
-The modified code file list is as follows:
+The modified code file list for CORE is as follows:
 
 https://github.com/ws1994/BBS_thesis/blob/fabric/images/peer/Dockerfile
 
