@@ -2,16 +2,18 @@
 
 ## Blockchain System
 
+(The Fabric system is brought up from some docker images. The modification on the Fabric source code (the docker images source code) is a seperate project from this one. Please find the Fabric source code project here https://github.com/ws1994/BBS_thesis/tree/fabric)
+
 Please find the code to bring up the underlying Fabric system with the path as follows:
 
 ```
 BBS_thesis/test-network/network.sh
 ```
-(The Fabric system is brought up from some docker images. The modification of source code (the docker images source code) is a seperate project from this one.)
 
 or with the link as follows:
 
 https://github.com/ws1994/BBS_thesis/blob/master/test-network/network.sh
+
 
 ## Smart Constract
 
